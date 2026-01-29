@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+<!--                 -->
+{% block title %}{{ profile_user.username }}'s Profile{% endblock title %}
+<!--                     -->
+{% block content %}
+<div class="profile-container">
+  <!-- Modern Profile Card -->
+  <div class="profile-card">
+    <div class="profile-cover"></div>
+    <div class="profile-content">
+      <img
+        src="{{ profile.profile_pic.url }}"
+        alt="Profile"
+        class="profile-avatar"
+      />
+
+      <div class="profile-info">
+        <h2>{{ profile_user.username }}</h2>
+        <p class="profile-bio">
+          {{ profile.bio|default:"No bio yet. Welcome to my profile!" }}
+        </p>
+
+        {% if user == profile_user %}
+        <a href="#" class="edit-btn">Edit Profile</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="profile-stats">
+      <div class="stat-item">
+        <span class="stat-value">{{ posts.count }}</span>
+        <span class="stat-label">Posts</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">0</span>
+        <span class="stat-label">Followers</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">0</span>
+        <span class="stat-label">Following</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Posts Feed -->
+  <h3 class="section-title">Recent Posts</h3>
+  <div class="feed">
+    {% for post in posts %}
+    <div class="post-card">
+      <div class="post-header">@{{ profile_user.username }}</div>
+      <div class="post-content">{{ post.content }}</div>
+      <div class="post-actions">
+        <button>Like</button>
+        <button>Comment</button>
+        <button>Share</button>
+      </div>
+    </div>
+    {% empty %}
+    <div class="post-card" style="text-align: center; color: var(--text-muted)">
+      No posts shared yet.
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock content %}
