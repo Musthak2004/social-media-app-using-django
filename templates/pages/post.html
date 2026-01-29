@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+<!--                  -->
+
+{% block title %}Post{% endblock title %}
+<!--                -->
+
+{% block content %}
+<!--                       -->
+
+<div class="post-card" id="post-{{ post.pk }}">
+  <div class="post-header">@{{ post.user.username }}</div>
+
+  {% if post.image %}
+  <div class="post-image">
+    <img
+      src="{{ post.image.url }}"
+      alt="Post Image"
+      style="max-width: 35%; border-radius: 15px; margin-top: 10px"
+    />
+  </div>
+  {% endif %}
+
+  <div class="post-content">{{ post.content }}</div>
+
+  <div class="post-actions">
+    <button onclick="handleLike(this)">
+      <span class="icon">👍</span>
+      <span class="count">0</span> Like
+    </button>
+
+    <button onclick="toggleCommentSection('{{ post.pk }}')">💬 Comment</button>
+
+    <button onclick="handleShare('{{ post.pk }}')">🔁 Share</button>
+  </div>
+
+  <!-- Comment Section -->
+  <div class="comment-section" id="comment-{{ post.pk }}">
+    <div class="comment-input-wrapper">
+      <input
+        type="text"
+        placeholder="Write a comment..."
+        onkeypress="checkEnter(event, '{{ post.pk }}')"
+      />
+      <button onclick="submitComment('{{ post.pk }}')">Post</button>
+    </div>
+
+    <ul class="comments" id="list-{{ post.pk }}"></ul>
+  </div>
+</div>
+
+<div id="shareToast" class="share-toast">Link copied to clipboard! 🔗</div>
+
+<script>
+  function handleLike(btn) {
+    btn.classList.toggle("active");
+    const count = btn.querySelector(".count");
+    const icon = btn.querySelector(".icon");
+
+    let value = parseInt(count.innerText);
+
+    if (btn.classList.contains("active")) {
+      count.innerText = value + 1;
+      icon.innerText = "❤️";
+    } else {
+      count.innerText = value - 1;
+      icon.innerText = "👍";
+    }
+  }
+
+  function toggleCommentSection(postId) {
+    const section = document.getElementById("comment-" + postId);
+    section.style.display =
+      section.style.display === "block" ? "none" : "block";
+    if (section.style.display === "block") {
+      section.querySelector("input").focus();
+    }
+  }
+
+  function checkEnter(event, postId) {
+    if (event.key === "Enter") {
+      submitComment(postId);
+    }
+  }
+
+  function submitComment(postId) {
+    const input = document.querySelector("#comment-" + postId + " input");
+    const list = document.getElementById("list-" + postId);
+
+    if (input.value.trim() !== "") {
+      const li = document.createElement("li");
+      li.innerHTML = "<strong>You:</strong> " + input.value;
+      list.prepend(li);
+      input.value = "";
+    }
+  }
+
+  function handleShare(postId) {
+    const url = window.location.origin + "/post/" + postId;
+    navigator.clipboard.writeText(url).then(() => {
+      const toast = document.getElementById("shareToast");
+      toast.style.display = "block";
+      setTimeout(() => {
+        toast.style.display = "none";
+      }, 3000);
+    });
+  }
+</script>
+
+<style>
+  .post-card {
+    background: var(--white);
+    padding: 1.5rem;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+  }
+
+  .post-header {
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+  .post-content {
+    font-size: 1.05rem;
+    margin-bottom: 1.25rem;
+  }
+  .post-actions {
+    display: flex;
+    gap: 1rem;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 1rem;
+  }
+  .post-actions button {
+    background: #f1f5f9;
+    border: none;
+    padding: 0.5rem 0.85rem;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .post-actions button.active {
+    background: #fee2e2;
+    color: #ef4444;
+  }
+  .comment-section {
+    display: none;
+    margin-top: 1rem;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 1rem;
+  }
+  .comment-input-wrapper {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 1rem;
+  }
+  .comment-input-wrapper input {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+  }
+  .comment-input-wrapper button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+  .comments {
+    list-style: none;
+    padding: 0;
+  }
+  .comments li {
+    background: #f8fafc;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+  }
+  .share-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #111827;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    display: none;
+  }
+</style>
+
+{% endblock content %}

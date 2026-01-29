@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-<!--                     -->
+<!--              -->
 {% block title %}Home{% endblock title %}
-<!--                   -->
+<!--                      -->
 {% block content %}
 
 <style>
@@ -30,23 +30,15 @@
     padding: 1.5rem;
     border-radius: 16px;
     border: 1px solid #e2e8f0;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-    transition: transform 0.2s;
   }
 
   .post-header {
     font-weight: 700;
-    font-size: 1rem;
     margin-bottom: 0.75rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
   }
 
   .post-content {
     font-size: 1.05rem;
-    line-height: 1.5;
-    color: var(--text-main);
     margin-bottom: 1.25rem;
   }
 
@@ -62,61 +54,70 @@
     border: none;
     padding: 0.5rem 0.85rem;
     border-radius: 20px;
-    color: var(--text-main);
     font-weight: 600;
-    font-size: 0.875rem;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    transition: all 0.2s;
   }
 
-  .post-actions button:hover {
-    background: #e2e8f0;
-    transform: translateY(-1px);
+  .post-actions button.active {
+    background: #fee2e2;
+    color: #ef4444;
   }
 
-  .comment-box {
+  .comment-section {
+    display: none;
     margin-top: 1rem;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 1rem;
   }
 
-  .comment-box input {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border-radius: 10px;
+  .comment-input-wrapper {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 1rem;
+  }
+
+  .comment-input-wrapper input {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    border-radius: 20px;
     border: 1px solid #e2e8f0;
-    background: #f8fafc;
-    outline: none;
   }
 
-  .comment-box input:focus {
-    border-color: var(--primary);
-    ring: 2px var(--primary);
+  .comment-input-wrapper button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0 1rem;
+    border-radius: 20px;
+    cursor: pointer;
   }
 
   .comments {
     list-style: none;
     padding: 0;
-    margin-top: 1rem;
   }
 
   .comments li {
     background: #f8fafc;
-    padding: 0.6rem 1rem;
+    padding: 0.5rem 1rem;
     border-radius: 8px;
     margin-bottom: 0.5rem;
-    font-size: 0.9rem;
   }
 
   .login-box {
-    background: var(--white);
-    padding: 3rem 2rem;
-    border-radius: 20px;
     text-align: center;
-    max-width: 450px;
-    margin: 4rem auto;
-    border: 1px solid #e2e8f0;
+    margin-top: 4rem;
+  }
+
+  .share-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #111827;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    display: none;
   }
 </style>
 
@@ -129,59 +130,105 @@
   </p>
 </div>
 
-<!-- Feed -->
-<div class="post-card">
-  <div class="post-header">@musthak</div>
-  <div class="post-content">Learning Django template inheritance today 🚀</div>
+<div class="feed">
+  {% for post in posts %}
+  <div class="post-card" id="post-{{ post.pk }}">
+    <div class="post-header">
+      <a href="{% url 'post' post.pk %}">@{{ post.user.username }}</a>
+    </div>
 
-  <div class="post-actions">
-    <button onclick="likePost(this)">👍 Like <span>0</span></button>
-    <button onclick="toggleComment(this)">💬 Comment</button>
-    <button onclick="sharePost()">🔁 Share</button>
-  </div>
+    <div class="post-content">{{ post.content|truncatechars:120 }}</div>
 
-  <div class="comment-box" style="display: none; margin-top: 10px">
-    <input
-      type="text"
-      placeholder="Write a comment..."
-      onkeydown="addComment(event, this)"
-    />
-    <ul class="comments"></ul>
+    <div class="post-actions">
+      <button onclick="handleLike(this)">
+        <span class="icon">👍</span>
+        <span class="count">0</span> Like
+      </button>
+
+      <button onclick="toggleCommentSection('{{ post.pk }}')">
+        💬 Comment
+      </button>
+
+      <button onclick="handleShare('{{ post.pk }}')">🔁 Share</button>
+    </div>
+
+    <div class="comment-section" id="comment-{{ post.pk }}">
+      <div class="comment-input-wrapper">
+        <input
+          type="text"
+          placeholder="Write a comment..."
+          onkeypress="checkEnter(event, '{{ post.pk }}')"
+        />
+        <button onclick="submitComment('{{ post.pk }}')">Post</button>
+      </div>
+
+      <ul class="comments" id="list-{{ post.pk }}"></ul>
+    </div>
   </div>
+  {% endfor %}
 </div>
+
+<div id="shareToast" class="share-toast">Link copied to clipboard! 🔗</div>
 
 {% else %}
 
 <div class="login-box">
   <h2>Welcome to MySocialApp</h2>
-  <p>Please login to see posts and connect with others 🤝</p>
+  <p>Please login to see posts 🤝</p>
 </div>
 
 {% endif %}
-<!--                         -->
+
 <script>
-  function likePost(btn) {
-    let span = btn.querySelector("span");
-    span.innerText = parseInt(span.innerText) + 1;
+  function handleLike(btn) {
+    btn.classList.toggle("active");
+    const count = btn.querySelector(".count");
+    const icon = btn.querySelector(".icon");
+
+    let value = parseInt(count.innerText);
+
+    if (btn.classList.contains("active")) {
+      count.innerText = value + 1;
+      icon.innerText = "❤️";
+    } else {
+      count.innerText = value - 1;
+      icon.innerText = "👍";
+    }
   }
 
-  function toggleComment(btn) {
-    let box = btn.closest(".post-card").querySelector(".comment-box");
-    box.style.display = box.style.display === "none" ? "block" : "none";
+  function toggleCommentSection(postId) {
+    const section = document.getElementById("comment-" + postId);
+    section.style.display =
+      section.style.display === "block" ? "none" : "block";
   }
 
-  function addComment(event, input) {
-    if (event.key === "Enter" && input.value.trim() !== "") {
-      let ul = input.nextElementSibling;
-      let li = document.createElement("li");
-      li.innerText = input.value;
-      ul.appendChild(li);
+  function checkEnter(event, postId) {
+    if (event.key === "Enter") {
+      submitComment(postId);
+    }
+  }
+
+  function submitComment(postId) {
+    const input = document.querySelector("#comment-" + postId + " input");
+    const list = document.getElementById("list-" + postId);
+
+    if (input.value.trim() !== "") {
+      const li = document.createElement("li");
+      li.innerHTML = "<strong>You:</strong> " + input.value;
+      list.prepend(li);
       input.value = "";
     }
   }
 
-  function sharePost() {
-    alert("Post link copied! 🔗 (Demo)");
+  function handleShare(postId) {
+    const url = window.location.origin + "/post/" + postId;
+    navigator.clipboard.writeText(url).then(() => {
+      const toast = document.getElementById("shareToast");
+      toast.style.display = "block";
+      setTimeout(() => {
+        toast.style.display = "none";
+      }, 3000);
+    });
   }
 </script>
 
