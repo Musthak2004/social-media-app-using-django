@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+<!--                     -->
+{% block title %}Home{% endblock title %}
+<!--                   -->
+{% block content %}
+
+<style>
+  .home-header {
+    margin-bottom: 2rem;
+  }
+  .home-header h2 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  .welcome-text {
+    color: var(--text-muted);
+    font-size: 1rem;
+  }
+
+  .feed {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 650px;
+  }
+
+  .post-card {
+    background: var(--white);
+    padding: 1.5rem;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    transition: transform 0.2s;
+  }
+
+  .post-header {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .post-content {
+    font-size: 1.05rem;
+    line-height: 1.5;
+    color: var(--text-main);
+    margin-bottom: 1.25rem;
+  }
+
+  .post-actions {
+    display: flex;
+    gap: 1rem;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 1rem;
+  }
+
+  .post-actions button {
+    background: #f1f5f9;
+    border: none;
+    padding: 0.5rem 0.85rem;
+    border-radius: 20px;
+    color: var(--text-main);
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+  }
+
+  .post-actions button:hover {
+    background: #e2e8f0;
+    transform: translateY(-1px);
+  }
+
+  .comment-box {
+    margin-top: 1rem;
+  }
+
+  .comment-box input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    outline: none;
+  }
+
+  .comment-box input:focus {
+    border-color: var(--primary);
+    ring: 2px var(--primary);
+  }
+
+  .comments {
+    list-style: none;
+    padding: 0;
+    margin-top: 1rem;
+  }
+
+  .comments li {
+    background: #f8fafc;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .login-box {
+    background: var(--white);
+    padding: 3rem 2rem;
+    border-radius: 20px;
+    text-align: center;
+    max-width: 450px;
+    margin: 4rem auto;
+    border: 1px solid #e2e8f0;
+  }
+</style>
+
+{% if user.is_authenticated %}
+
+<div class="home-header">
+  <h2>Home</h2>
+  <p class="welcome-text">
+    Welcome back, <strong>{{ user.username }}</strong> 👋
+  </p>
+</div>
+
+<!-- Feed -->
+<div class="post-card">
+  <div class="post-header">@musthak</div>
+  <div class="post-content">Learning Django template inheritance today 🚀</div>
+
+  <div class="post-actions">
+    <button onclick="likePost(this)">👍 Like <span>0</span></button>
+    <button onclick="toggleComment(this)">💬 Comment</button>
+    <button onclick="sharePost()">🔁 Share</button>
+  </div>
+
+  <div class="comment-box" style="display: none; margin-top: 10px">
+    <input
+      type="text"
+      placeholder="Write a comment..."
+      onkeydown="addComment(event, this)"
+    />
+    <ul class="comments"></ul>
+  </div>
+</div>
+
+{% else %}
+
+<div class="login-box">
+  <h2>Welcome to MySocialApp</h2>
+  <p>Please login to see posts and connect with others 🤝</p>
+</div>
+
+{% endif %}
+<!--                         -->
+<script>
+  function likePost(btn) {
+    let span = btn.querySelector("span");
+    span.innerText = parseInt(span.innerText) + 1;
+  }
+
+  function toggleComment(btn) {
+    let box = btn.closest(".post-card").querySelector(".comment-box");
+    box.style.display = box.style.display === "none" ? "block" : "none";
+  }
+
+  function addComment(event, input) {
+    if (event.key === "Enter" && input.value.trim() !== "") {
+      let ul = input.nextElementSibling;
+      let li = document.createElement("li");
+      li.innerText = input.value;
+      ul.appendChild(li);
+      input.value = "";
+    }
+  }
+
+  function sharePost() {
+    alert("Post link copied! 🔗 (Demo)");
+  }
+</script>
+
+{% endblock content %}

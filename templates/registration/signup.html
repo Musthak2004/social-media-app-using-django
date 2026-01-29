@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+<!--                  -->
+{% block title %}Create Account{% endblock %}
+<!--                    -->
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2>Get Started</h2>
+      <p>Create a new account to join the community</p>
+    </div>
+    <div class="auth-body">
+      <form method="post">
+        {% csrf_token %} {{ form.as_p }}
+        <button type="submit" class="auth-btn">Create Account</button>
+      </form>
+    </div>
+    <div class="auth-footer">
+      Already have an account? <a href="{% url 'login' %}">Login here</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
