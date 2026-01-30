@@ -6,7 +6,6 @@
 
 {% block content %}
 <!--                       -->
-
 <div class="post-card" id="post-{{ post.pk }}">
   <div class="post-header">@{{ post.user.username }}</div>
 
@@ -46,6 +45,12 @@
 
     <ul class="comments" id="list-{{ post.pk }}"></ul>
   </div>
+  {% if user == post.user %}
+  <div class="post-admin-actions">
+    <a href="{% url 'post_update' post.pk %}" class="btn-edit">Edit Post</a>
+    <a href="{% url 'post_delete' post.pk %}" class="btn-delete">Delete Post</a>
+  </div>
+  {% endif %}
 </div>
 
 <div id="shareToast" class="share-toast">Link copied to clipboard! 🔗</div>
@@ -184,6 +189,57 @@
     padding: 12px 24px;
     border-radius: 8px;
     display: none;
+  }
+  /* Container for Edit/Delete buttons */
+  .post-admin-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px dashed #e2e8f0;
+  }
+
+  /* Base button styling */
+  .post-admin-actions a {
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    flex: 1; /* Makes buttons equal width on mobile */
+    text-align: center;
+  }
+
+  /* Edit Button Style */
+  .btn-edit {
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+  }
+
+  .btn-edit:hover {
+    background-color: #e2e8f0;
+    color: #1e293b;
+  }
+
+  /* Delete Button Style */
+  .btn-delete {
+    background-color: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+  }
+
+  .btn-delete:hover {
+    background-color: #fecaca;
+    color: #b91c1c;
+  }
+
+  /* Responsive adjustment */
+  @media (max-width: 480px) {
+    .post-admin-actions {
+      flex-direction: column;
+    }
   }
 </style>
 

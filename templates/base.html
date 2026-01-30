@@ -434,6 +434,116 @@
           gap: 1rem;
         }
       }
+      /* Container Layout */
+      .form-card {
+        max-width: 500px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e5e7eb;
+      }
+
+      .form-card h2 {
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+        color: #111827;
+        font-weight: 700;
+        text-align: center;
+      }
+
+      /* Django Form Styling (form.as_p) */
+      .form-card p {
+        margin-bottom: 1.25rem;
+      }
+
+      .form-card label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #374151;
+        font-size: 0.875rem;
+      }
+
+      .form-card input[type="text"],
+      .form-card input[type="file"],
+      .form-card textarea,
+      .form-card select {
+        width: 100%;
+        padding: 0.625rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+
+      .form-card input:focus,
+      .form-card textarea:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      }
+
+      /* Button System */
+      .btn-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+
+      .btn {
+        flex: 1;
+        padding: 0.625rem 1.25rem;
+        font-weight: 600;
+        border-radius: 6px;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: none;
+        font-size: 0.875rem;
+      }
+
+      .btn-primary {
+        background: #2563eb;
+        color: white;
+      }
+      .btn-primary:hover {
+        background: #1d4ed8;
+      }
+
+      .btn-danger {
+        background: #dc2626;
+        color: white;
+      }
+      .btn-danger:hover {
+        background: #b91c1c;
+      }
+
+      .btn-secondary {
+        background: #f3f4f6;
+        color: #374151;
+        border: 1px solid #d1d5db;
+      }
+      .btn-secondary:hover {
+        background: #e5e7eb;
+      }
+
+      /* Responsive */
+      @media (max-width: 640px) {
+        .form-card {
+          margin: 1rem;
+          padding: 1.5rem;
+        }
+        .btn-group {
+          flex-direction: column;
+        }
+      }
     </style>
   </head>
 
@@ -446,8 +556,8 @@
         <a href="/">🏠 Home</a>
 
         {% if user.is_authenticated %}
-        <a href="{% url 'profile' username=user.username %}">👤 Profile</a>
-        <a href="#">➕ Create Post</a>
+        <a href="">👤 Profile</a>
+        <a href="{% url 'post_create' %}">➕ Create Post</a>
 
         <div class="auth-btn logout">
           <form method="post" action="{% url 'logout' %}">

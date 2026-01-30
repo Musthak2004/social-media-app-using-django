@@ -1,7 +1,9 @@
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
-from .models import Profile, Post
+from .models import Post
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 User = get_user_model()
 
@@ -22,19 +24,32 @@ class PostPageView(TemplateView):
         post_id = self.kwargs.get('pk')
         context['post'] = get_object_or_404(Post, pk=post_id)
         return context
+class PostCreateView(LoginRequiredMixin, CreateView):
+    model = Post
+    template_name = "pages/post_create.html"
+    fields = ["content", "image"]
+    success_url = reverse_lazy("home")
 
-class ProfilePageView(TemplateView):
-    template_name = "pages/profile.html"
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Post
+    template_name = "pages/post_edit.html"
+    fields = ["content", "image"]
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        username = self.kwargs.get('username')
+    def test_func(self):
+        post = self.get_object()
+        return self.request.user == post.user
+    
+    def get_success_url(self):
+        return reverse_lazy("post", kwargs={"pk": self.object.pk})
+    
+class PostDeleteView(LoginRequiredMixin, DeleteView):
+    model = Post
+    template_name = "pages/post_delete.html"
+    success_url = reverse_lazy("home")
 
-        user = get_object_or_404(User, username=username)
-
-        profile = get_object_or_404(Profile, user=user)
-
-        context['profile_user'] = user
-        context['profile'] = profile
-
-        return context
+    def get_queryset(self):
+        """Only allow the owner to delete their post."""
+        return Post.objects.filter(user=self.request.user)
